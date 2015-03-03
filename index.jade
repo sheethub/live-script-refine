@@ -1,0 +1,34 @@
+doctype html
+html
+	head
+		title Interface
+		//- include ../j_piece/header
+		include ../j_piece/inheader
+		link(href="./css/interface.css", rel="stylesheet")
+		link(href="../lib/codemirror/lib/codemirror.css", rel="stylesheet")
+		link(href="../lib/codemirror/theme/monokai.css", rel="stylesheet")
+		script(type="text/javascript", src="../lib/js/colorbrewer.v1.min.js")
+		script(type="text/javascript", src="../lib/js/livescript.js")
+		script(type="text/javascript", src="../lib/codemirror/lib/codemirror.js")
+		script(type="text/javascript", src="../lib/codemirror/mode/livescript/livescript.js")
+
+		
+		
+
+	body
+		div.container
+			div.row
+				div.col-lg-12
+					div.intableholder
+					div.jsscript(style="height:350px")
+						form
+							textarea#codeeditor.
+								inData! |> outData
+
+					div.alertContainer
+					//- .alert.alert-danger(role="alert")
+
+
+					div.outtableholder
+
+		script(type="text/javascript", src="./js/interface_working.js")
