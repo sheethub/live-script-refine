@@ -23,7 +23,7 @@ html
 					div.jsscript(style="height:350px")
 						form
 							textarea#codeeditor.
-								inData! |> outData
+								inData! |> _.each (-> it["土地面積"] = (+it["土地面積"] ).toFixed 0 ) |> outData
 
 					div.alertContainer
 					//- .alert.alert-danger(role="alert")

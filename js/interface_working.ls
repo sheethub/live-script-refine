@@ -2,6 +2,8 @@ _ = require "prelude-ls"
 require! ["LiveScript"]
 
 
+###TODO each time that it evalute, start from scratch
+
 ## html text
 stripHtml = (string)->
 	tmp = document.createElement "DIV"
@@ -66,18 +68,17 @@ updatePreview = ->
 			
 	# setTimeout updatePreview, 10000
 
-
-
 outData = null
 inData = null
 
+getPageUrl = ->
+	"https://sheethub.com/" +  (document.URL.split "?" |> _.drop 1 |> _.join "?") + "&format=json&limit=50"
 
-### table
+err, data <- d3.json getPageUrl!
 
-
-err, data <- d3.text "./data/新北市政府新聞稿.csv"
+cols = data.sheet.columns |> _.map (-> it.name)
 inData := ->
-	data |> d3.csv.parse
+	data.data |> _.map ((row)-> _.lists-to-obj cols, row)
 
 buildTable = (place)->
 	makeTable = (data)->
@@ -92,7 +93,7 @@ buildTable = (place)->
 			}
 
 		cols = data[0] |> _.Obj.keys
-		sampledata = data |> _.take 5
+		sampledata = data
 		### data |> _.take 50 |> console.log 
 		### sampledata |> console.log
 
@@ -126,21 +127,9 @@ buildTable = (place)->
 				"class": -> if _.is-type 'Number', it then "numberCell text-right"
 			}
 
-
 inTable = buildTable ".intableholder"
 outTable = buildTable ".outtableholder"
 
 inData! |> inTable
 
 outData := -> it |> outTable
-
-# data |> _.map (-> +it["號次"]) |> _.unique |> console.log
-# data |> _.map (-> (it["得票率"].split "%")["0"]) |> console.log
-
-
-
-
-
-
-
-

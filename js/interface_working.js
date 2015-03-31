@@ -1,4 +1,4 @@
-var _, LiveScript, stripHtml, buildConsoler, consoler, remover, editor, delay, jstext, updatePreview, outData, inData;
+var _, LiveScript, stripHtml, buildConsoler, consoler, remover, editor, delay, jstext, updatePreview, outData, inData, getPageUrl;
 _ = require("prelude-ls");
 LiveScript = require('LiveScript');
 stripHtml = function(string){
@@ -62,11 +62,22 @@ updatePreview = function(){
 };
 outData = null;
 inData = null;
-d3.text("./data/新北市政府新聞稿.csv", function(err, data){
-  var buildTable, inTable, outTable;
+getPageUrl = function(){
+  return "https://sheethub.com/" + _.join("?")(
+  _.drop(1)(
+  document.URL.split("?"))) + "&format=json&limit=50";
+};
+d3.json(getPageUrl(), function(err, data){
+  var cols, buildTable, inTable, outTable;
+  cols = _.map(function(it){
+    return it.name;
+  })(
+  data.sheet.columns);
   inData = function(){
-    return d3.csv.parse(
-    data);
+    return _.map(function(row){
+      return _.listsToObj(cols, row);
+    })(
+    data.data);
   };
   buildTable = function(place){
     var makeTable;
@@ -78,8 +89,7 @@ d3.text("./data/新北市政府新聞稿.csv", function(err, data){
       });
       cols = _.Obj.keys(
       data[0]);
-      sampledata = _.take(5)(
-      data);
+      sampledata = data;
       format = d3.format("0,000");
       table.append("thead").append("tr").selectAll("th").data(cols).enter().append("th").text(function(it){
         return it;

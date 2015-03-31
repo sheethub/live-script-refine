@@ -1,4 +1,15 @@
 
+
+htmlCleaner = ->
+	it |> stripHtml |> remover [" ", " ", " "] |> (-> it.trim!)
+
+
+inData! |> _.Obj.each (-> it.Content = it.Content |> htmlCleaner ) |> outData
+
+
+
+
+
 data = inData!
 data |> _.map (-> it["地區"] ) |> _.unique |> console.log
 data |> outData
