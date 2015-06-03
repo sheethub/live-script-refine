@@ -5,3 +5,11 @@ body {
   font-family: monospace;
   color: #8a2be2;
 }
+.intableholder {
+  height: 300px;
+  overflow: auto;
+}
+.outtableholder {
+  height: 300px;
+  overflow: auto;
+}

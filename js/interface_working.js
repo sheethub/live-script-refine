@@ -1,12 +1,6 @@
-var _, LiveScript, stripHtml, buildConsoler, consoler, remover, editor, delay, jstext, updatePreview, outData, inData, getPageUrl;
+var _, LiveScript, buildConsoler, consoler, editor, delay, jstext, updatePreview, outData, inData, buildTable, inTable, outTable, parsedSheetHub, getPageUrl, initPage;
 _ = require("prelude-ls");
 LiveScript = require('LiveScript');
-stripHtml = function(string){
-  var tmp;
-  tmp = document.createElement("DIV");
-  tmp.innerHTML = string;
-  return tmp.textContent || tmp.innerText || "";
-};
 buildConsoler = function(){
   var temp, func;
   temp = null;
@@ -18,19 +12,6 @@ buildConsoler = function(){
   };
 };
 consoler = buildConsoler();
-remover = function(list){
-  var func;
-  return func = function(string){
-    var r;
-    if (_.isType('Array', list)) {
-      r = new RegExp(_.join("|")(
-      list), "g");
-    } else {
-      r = new RegExp(list, "g");
-    }
-    return string.replace(r, "");
-  };
-};
 editor = CodeMirror.fromTextArea(document.getElementById("codeeditor", {
   "lineNumbers": true,
   "mode": "livescript"
@@ -40,7 +21,7 @@ delay = null;
 jstext = null;
 editor.on("change", function(){
   clearTimeout(delay);
-  return delay = setTimeout(updatePreview, 300);
+  return delay = setTimeout(updatePreview, 500);
 });
 updatePreview = function(){
   var e;
@@ -62,64 +43,80 @@ updatePreview = function(){
 };
 outData = null;
 inData = null;
-getPageUrl = function(){
-  return "https://sheethub.com/" + _.join("?")(
-  _.drop(1)(
-  document.URL.split("?"))) + "&format=json&limit=50";
+buildTable = function(place){
+  var makeTable;
+  return makeTable = function(data){
+    var table, cols, sampledata, format;
+    d3.selectAll(place + " table").remove();
+    table = d3.selectAll(place).append("table").attr({
+      "class": "table table-bordered table-hover"
+    });
+    cols = _.Obj.keys(
+    data[0]);
+    sampledata = data;
+    format = d3.format("0,000");
+    table.append("thead").append("tr").selectAll("th").data(cols).enter().append("th").text(function(it){
+      return it;
+    }).attr({
+      "class": "text-center"
+    });
+    return table.append("tbody").selectAll("tr").data(sampledata).enter().append("tr").selectAll("td").data(function(it){
+      return _.Obj.values(
+      it);
+    }).enter().append("td").text(function(it){
+      if (_.isType('Number', it)) {
+        return format(it);
+      } else {
+        return it;
+      }
+    }).attr({
+      "class": function(it){
+        if (_.isType('Number', it)) {
+          return "numberCell text-right";
+        }
+      }
+    });
+  };
 };
-d3.json(getPageUrl(), function(err, data){
-  var cols, buildTable, inTable, outTable;
+inTable = buildTable(".intableholder");
+outTable = buildTable(".outtableholder");
+outData = function(it){
+  return outTable(
+  it);
+};
+parsedSheetHub = function(data){
+  var cols;
   cols = _.map(function(it){
     return it.name;
   })(
   data.sheet.columns);
-  inData = function(){
-    return _.map(function(row){
-      return _.listsToObj(cols, row);
-    })(
-    data.data);
-  };
-  buildTable = function(place){
-    var makeTable;
-    return makeTable = function(data){
-      var table, cols, sampledata, format;
-      d3.selectAll(place + " table").remove();
-      table = d3.selectAll(place).append("table").attr({
-        "class": "table table-bordered table-hover"
-      });
-      cols = _.Obj.keys(
-      data[0]);
-      sampledata = data;
-      format = d3.format("0,000");
-      table.append("thead").append("tr").selectAll("th").data(cols).enter().append("th").text(function(it){
-        return it;
-      }).attr({
-        "class": "text-center"
-      });
-      return table.append("tbody").selectAll("tr").data(sampledata).enter().append("tr").selectAll("td").data(function(it){
-        return _.Obj.values(
-        it);
-      }).enter().append("td").text(function(it){
-        if (_.isType('Number', it)) {
-          return format(it);
-        } else {
-          return it;
-        }
-      }).attr({
-        "class": function(it){
-          if (_.isType('Number', it)) {
-            return "numberCell text-right";
-          }
-        }
-      });
+  return _.map(function(row){
+    return _.listsToObj(cols, row);
+  })(
+  data.data);
+};
+getPageUrl = function(){
+  return _.join("?")(
+  _.drop(1)(
+  document.location.href.split("?"))) + "?format=json&offset=0&limit=50";
+};
+initPage = function(){
+  return d3.json(getPageUrl(), function(err, data){
+    var parsedData;
+    parsedData = parsedSheetHub(
+    data);
+    inData = function(){
+      return JSON.parse(
+      JSON.stringify(
+      parsedData));
     };
-  };
-  inTable = buildTable(".intableholder");
-  outTable = buildTable(".outtableholder");
-  inTable(
-  inData());
-  return outData = function(it){
-    return outTable(
-    it);
-  };
-});
+    console.log(
+    inData);
+    return inTable(
+    inData());
+  });
+};
+if (document.location.href.indexOf("?") < 0) {
+  document.location.href += "?https://sheethub.com/data.gov.tw/臺南市托育機構";
+}
+initPage();

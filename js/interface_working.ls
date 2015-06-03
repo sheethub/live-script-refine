@@ -5,10 +5,22 @@ require! ["LiveScript"]
 ###TODO each time that it evalute, start from scratch
 
 ## html text
-stripHtml = (string)->
-	tmp = document.createElement "DIV"
-	tmp.innerHTML = string
-	tmp.textContent or tmp.innerText or ""
+# stripHtml = (string)->
+# 	tmp = document.createElement "DIV"
+# 	tmp.innerHTML = string
+# 	tmp.textContent or tmp.innerText or ""
+
+
+# remover = (list)->
+# 	func = (string)->
+# 		if (_.is-type 'Array', list)
+# 			r = new RegExp (list |> _.join "|"), "g"
+# 		else
+# 			r = new RegExp (list), "g"
+# 		string.replace(r, "")
+# # ## 'd-ew%fr#w' |> remover ['#', '-', '%'] |> console.log ##dewfrw
+# # ## 'd-ew%fr#w' |> remover '#' |> console.log ##d-ew%frw
+
 
 buildConsoler = ->
 	temp = null
@@ -18,17 +30,6 @@ buildConsoler = ->
 			temp := text
 consoler = buildConsoler!
 
-remover = (list)->
-	func = (string)->
-		if (_.is-type 'Array', list)
-			r = new RegExp (list |> _.join "|"), "g"
-		else
-			r = new RegExp (list), "g"
-		string.replace(r, "")
-# ## 'd-ew%fr#w' |> remover ['#', '-', '%'] |> console.log ##dewfrw
-# ## 'd-ew%fr#w' |> remover '#' |> console.log ##d-ew%frw
-
-
 
 ### editor
 editor = CodeMirror.fromTextArea document.getElementById "codeeditor", {
@@ -37,14 +38,12 @@ editor = CodeMirror.fromTextArea document.getElementById "codeeditor", {
 }
 editor.setOption "theme", "monokai"
 
-
-
 delay = null
 jstext = null
 
 editor.on "change", ->
 	clearTimeout delay
-	delay := setTimeout updatePreview, 300
+	delay := setTimeout updatePreview, 500
 
 updatePreview = ->
 	try
@@ -71,15 +70,6 @@ updatePreview = ->
 outData = null
 inData = null
 
-getPageUrl = ->
-	"https://sheethub.com/" +  (document.URL.split "?" |> _.drop 1 |> _.join "?") + "&format=json&limit=50"
-
-err, data <- d3.json getPageUrl!
-
-cols = data.sheet.columns |> _.map (-> it.name)
-inData := ->
-	data.data |> _.map ((row)-> _.lists-to-obj cols, row)
-
 buildTable = (place)->
 	makeTable = (data)->
 		d3.selectAll (place + " table")
@@ -94,11 +84,7 @@ buildTable = (place)->
 
 		cols = data[0] |> _.Obj.keys
 		sampledata = data
-		### data |> _.take 50 |> console.log 
-		### sampledata |> console.log
-
 		format = d3.format("0,000")
-
 
 		table
 			.append "thead"
@@ -129,7 +115,28 @@ buildTable = (place)->
 
 inTable = buildTable ".intableholder"
 outTable = buildTable ".outtableholder"
-
-inData! |> inTable
-
+# inData := -> it |> inTable
 outData := -> it |> outTable
+
+
+parsedSheetHub = (data)->
+	cols = data.sheet.columns |> _.map (-> it.name)
+	(data.data |> _.map ((row)-> _.lists-to-obj cols, row))
+
+
+getPageUrl = ->
+	(document.location.href.split "?" |> _.drop 1 |> _.join "?") + "?format=json&offset=0&limit=50"
+
+initPage = ->
+	err, data <- d3.json getPageUrl!
+	parsedData = data |> parsedSheetHub
+	inData := -> parsedData |> JSON.stringify |> JSON.parse
+	inData |> console.log 
+	inData! |> inTable
+
+if ((document.location.href.indexOf "?") < 0)
+	document.location.href += "?https://sheethub.com/data.gov.tw/臺南市托育機構"
+
+initPage!
+
+

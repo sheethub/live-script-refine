@@ -14,7 +14,7 @@ html
 
 		
 		
-
+	//- inData! |> _.each (-> it["土地面積"] = (+it["土地面積"] ).toFixed 0 ) |> outData
 	body
 		div.container
 			div.row
@@ -23,10 +23,19 @@ html
 					div.jsscript(style="height:350px")
 						form
 							textarea#codeeditor.
-								inData! |> _.each (-> it["土地面積"] = (+it["土地面積"] ).toFixed 0 ) |> outData
+								data = inData!
 
+
+
+
+
+
+
+
+								data |> outData
 					div.alertContainer
 					//- .alert.alert-danger(role="alert")
+					//- |> outData
 
 
 					div.outtableholder
